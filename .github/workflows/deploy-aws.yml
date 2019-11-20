@@ -1,0 +1,38 @@
+name: Deploy
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    name: Publish
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate
+        uses: actions/checkout@master
+        uses: jdickey/bash@master
+        args:
+          - mkdir .generated
+          - cp static/* .generated
+          - sed "s/{date}/`date +%Y-%m-%d`/" templates/sitemap.xml > .generated/sitemap.xml
+
+      - name: Sync
+        uses: awact/s3-action@master
+        with:
+          args: --acl public-read --follow-symlinks --delete
+        env:
+          SOURCE_DIR: './generated'
+          AWS_REGION: 'eu-west-1'
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+
+      - name: Invalidate
+        uses: awact/cloudfront-action@master
+        env:
+          SOURCE_DIR: './generated'
+          AWS_REGION: 'eu-west-1'
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          DISTRIBUTION_ID: ${{ secrets.AWS_DISTRIBUTION_ID }}
