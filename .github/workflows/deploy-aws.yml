@@ -15,10 +15,10 @@ jobs:
       - name: Generate
         uses: jdickey/bash@master
         with:
-          args:
-            - mkdir .generated
-            - cp static/* .generated
-            - sed "s/{date}/`date +%Y-%m-%d`/" templates/sitemap.xml > .generated/sitemap.xml
+          args: |
+            mkdir .generated
+            cp static/* .generated
+            sed "s/{date}/`date +%Y-%m-%d`/" templates/sitemap.xml > .generated/sitemap.xml
 
       - name: Sync
         uses: awact/s3-action@master
