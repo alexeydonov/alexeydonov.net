@@ -13,12 +13,11 @@ jobs:
         uses: actions/checkout@master
 
       - name: Generate
-        uses: jdickey/bash@master
-        with:
-          args: |
+          run: |
             mkdir .generated
             cp static/* .generated
             sed "s/{date}/`date +%Y-%m-%d`/" templates/sitemap.xml > .generated/sitemap.xml
+          shell: bash
 
       - name: Sync
         uses: awact/s3-action@master
