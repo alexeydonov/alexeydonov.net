@@ -1,4 +1,4 @@
-name: Deploy
+name: Publish
 on:
   push:
     branches:
@@ -12,14 +12,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@master
 
-      - name: Generate
+      - name: Generate Сontent
         run: |
           mkdir .generated
           cp static/* .generated
           sed "s/{date}/`date +%Y-%m-%d`/" templates/sitemap.xml > .generated/sitemap.xml
         shell: bash
 
-      - name: Sync
+      - name: Sync with S3
         uses: awact/s3-action@master
         with:
           args: --acl public-read --follow-symlinks --delete
@@ -30,7 +30,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
 
-      - name: Invalidate
+      - name: Invalidate CloudFront Distribution
         uses: awact/cloudfront-action@master
         env:
           SOURCE_DIR: '.generated'
